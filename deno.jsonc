@@ -1,0 +1,20 @@
+{
+  "$schema": "https://deno.land/x/deno/cli/schemas/config-file.v1.json",
+  "compilerOptions": {
+    "strict": true,
+    "useUnknownInCatchVariables": true,
+    "noImplicitOverride": true,
+    "types": [
+      "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-ts-types@latest/mod.d.ts"
+    ]
+  },
+  "exclude": [
+    ".git"
+  ],
+  "tasks": {
+    "test": "deno test -A --allow-none --shuffle --parallel",
+    "lockfile:update": "deno cache --reload --lock=deno.lock --lock-write deps.ts dev_deps.ts && deno task check && deno task test",
+    "check:types": "deno check **/*.ts",
+    "check": "deno fmt --check && deno lint && deno task check:types && deno task test"
+  }
+}
