@@ -1,6 +1,7 @@
-import type { AuthorizeUrlOptions, JetTowerOptions } from "./types.ts";
-import { authorizeUrlQuery } from "./api.ts";
-import type { AuthorizeUrlQueryResponse } from "./api.ts";
+import type { JetTowerOptions } from "./types.ts";
+import { oauthApiEndpointQuery } from "./api.ts";
+import type { OAuthAPIEndpointQueryResponse } from "./api.ts";
+import { joinPath } from "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-ts-types@67d4db8893ab83171183d07dd208db056188fb46/lib/url.ts";
 
 export class JetTower {
   private pluginInstance: BreezeRuntime.Plugin;
@@ -18,43 +19,48 @@ export class JetTower {
   /**
    * Build authorize URL for OAuth 2 login with Tower
    *
-   * @param redirectUri - URL to redirect after login
-   * @param options - Extra options for authorize URL
    * @returns authorize URL for OAuth 2 login
    *
    * @example
    *
-   * Build an authorize URL without any options
    * ```ts
    * const tower = new JetTower({ instanceName: "towerInstance" });
-   * const url = await tower.authorizeUrl("https://example.com/redirect");
-   * ```
-   *
-   * Build an authorize URL with state and scope
-   * ```ts
-   * const tower = new JetTower({ instanceName: "towerInstance" });
-   * const url = await tower.authorizeUrl("https://example.com/redirect", { state: "foo", scope: "bar" });
+   * const url = await tower.authorizeUrl();
    * ```
    */
-  async authorizeUrl(
-    redirectUri: string,
-    options?: AuthorizeUrlOptions,
-  ): Promise<string> {
-    const { state, scope } = options ?? {};
-
-    const { authorizeUrl } = await this.query<AuthorizeUrlQueryResponse>(
-      authorizeUrlQuery,
-      {
-        redirectUri,
-        state,
-        scope,
-      },
-    );
-
-    return authorizeUrl;
+  async authorizeUrl(): Promise<URL> {
+    const url = await this.oauthApiEndpoint();
+    url.pathname = joinPath(url.pathname, "/authorize");
+    return url;
   }
 
-  private async query<T>(query: string, variables: object): Promise<T> {
+  /**
+   * Build token URL for OAuth 2 login with Tower
+   *
+   * @returns token URL for OAuth 2 login
+   *
+   * @example
+   *
+   * ```ts
+   * const tower = new JetTower({ instanceName: "towerInstance" });
+   * const url = await tower.tokenUrl();
+   * ```
+   */
+  async tokenUrl(): Promise<URL> {
+    const url = await this.oauthApiEndpoint();
+    url.pathname = joinPath(url.pathname, "/token");
+    return url;
+  }
+
+  private async oauthApiEndpoint(): Promise<URL> {
+    const { oauthApiEndpoint } = await this.query<
+      OAuthAPIEndpointQueryResponse
+    >(oauthApiEndpointQuery);
+
+    return new URL(oauthApiEndpoint);
+  }
+
+  private async query<T>(query: string, variables?: object): Promise<T> {
     const endpoint = await this.pluginInstance.getEndpoint();
 
     const response = await fetch(endpoint, {

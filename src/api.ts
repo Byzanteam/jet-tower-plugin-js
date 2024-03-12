@@ -1,16 +1,12 @@
-const authorizeUrlQuery = `
-query AuthorizeURL(
-  $redirectUri: String!
-  $state: String
-  $scope: String
-) {
-  authorizeUrl(redirectUri: $redirectUri, state: $state, scope: $scope)
+const oauthApiEndpointQuery = `
+query OAuthAPIEndpointQuery {
+  oauthApiEndpoint
 }
 `;
 
-interface AuthorizeUrlQueryResponse {
-  authorizeUrl: string;
+interface OAuthAPIEndpointQueryResponse {
+  oauthApiEndpoint: string;
 }
 
-export { authorizeUrlQuery };
-export type { AuthorizeUrlQueryResponse };
+export { oauthApiEndpointQuery };
+export type { OAuthAPIEndpointQueryResponse };
