@@ -1,4 +1,8 @@
-import type { JetTowerOAuthClient, JetTowerOptions } from "./types.ts";
+import type {
+  JetTowerOAuthClient,
+  JetTowerOptions,
+  UserInfo,
+} from "./types.ts";
 import { oauthApiEndpointQuery, oauthClientQuery } from "./api.ts";
 import type {
   OAuthAPIEndpointQueryResponse,
@@ -72,6 +76,45 @@ export class JetTower {
   async tokenUrl(): Promise<URL> {
     const url = await this.oauthApiEndpoint();
     url.pathname = urlUtils.joinPath(url.pathname, "/token");
+    return url;
+  }
+
+  /**
+   * Get info of current user
+   *
+   * @param accessToken - OAuth 2 access token
+   * @returns user info
+   *
+   * @example
+   *
+   * ```ts
+   * const tower = new JetTower({ instanceName: "towerInstance" });
+   * const { name, phone, ...extraInfo } = await tower.getUserInfo(accessToken);
+   * ```
+   */
+  async getUserInfo(accessToken: string): Promise<UserInfo> {
+    const url = await this.userInfoUrl();
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Authorization": `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.ok) {
+      return response.json();
+    } else {
+      const errorBody = await response.json();
+      throw new Error("Failed to get user info", { cause: errorBody });
+    }
+  }
+
+  private async userInfoUrl(): Promise<URL> {
+    const url = await this.oauthApiEndpoint();
+    url.pathname = urlUtils.joinPath(url.pathname, "/user");
     return url;
   }
 
