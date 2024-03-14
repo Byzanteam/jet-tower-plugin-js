@@ -1,7 +1,7 @@
 {
   "version": "3",
   "remote": {
-    "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-ts-types@67d4db8893ab83171183d07dd208db056188fb46/lib/runtime.ts": "ff2f817652120a33b5d8971ce21928ddeec16139bba7cfd2dd20600055d01485",
-    "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-ts-types@67d4db8893ab83171183d07dd208db056188fb46/lib/url.ts": "9bd964c206bf94807e22d4851ec4ce18aa8b887d02307a8cd4ee80894558b03c"
+    "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-js@latest/lib/runtime.ts": "ff2f817652120a33b5d8971ce21928ddeec16139bba7cfd2dd20600055d01485",
+    "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-js@latest/lib/url.ts": "82ce34a50847547eb70391e543dbe29423281fc77822621127a5f609ba8de415"
   }
 }

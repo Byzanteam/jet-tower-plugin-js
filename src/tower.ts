@@ -1,7 +1,10 @@
-import type { JetTowerOptions } from "./types.ts";
-import { oauthApiEndpointQuery } from "./api.ts";
-import type { OAuthAPIEndpointQueryResponse } from "./api.ts";
-import { joinPath } from "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-ts-types@67d4db8893ab83171183d07dd208db056188fb46/lib/url.ts";
+import type { JetTowerOAuthClient, JetTowerOptions } from "./types.ts";
+import { oauthApiEndpointQuery, oauthClientQuery } from "./api.ts";
+import type {
+  OAuthAPIEndpointQueryResponse,
+  OAuthClientQueryResponse,
+} from "./api.ts";
+import { url as urlUtils } from "../deps.ts";
 
 export class JetTower {
   private pluginInstance: BreezeRuntime.Plugin;
@@ -14,6 +17,26 @@ export class JetTower {
     }
 
     this.pluginInstance = pluginInstance;
+  }
+
+  /**
+   * Retrieve OAuth 2 client id and secret
+   *
+   * @returns OAuth 2 client id and secret
+   *
+   * @example
+   *
+   * ```ts
+   * const tower = new JetTower({ instanceName: "towerInstance" });
+   * const { clientId, clientSecret } = await tower.oauthClient();
+   * ```
+   */
+  async oauthClient(): Promise<JetTowerOAuthClient> {
+    const { oauthClient } = await this.query<OAuthClientQueryResponse>(
+      oauthClientQuery,
+    );
+
+    return oauthClient;
   }
 
   /**
@@ -30,7 +53,7 @@ export class JetTower {
    */
   async authorizeUrl(): Promise<URL> {
     const url = await this.oauthApiEndpoint();
-    url.pathname = joinPath(url.pathname, "/authorize");
+    url.pathname = urlUtils.joinPath(url.pathname, "/authorize");
     return url;
   }
 
@@ -48,7 +71,7 @@ export class JetTower {
    */
   async tokenUrl(): Promise<URL> {
     const url = await this.oauthApiEndpoint();
-    url.pathname = joinPath(url.pathname, "/token");
+    url.pathname = urlUtils.joinPath(url.pathname, "/token");
     return url;
   }
 
