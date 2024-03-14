@@ -12,6 +12,7 @@ type UserInfoValue = UserInfoScalarValue | UserInfoScalarValue[];
 
 interface UserInfo {
   [index: string]: UserInfoValue;
+  id: string;
   name: string;
   phone: string;
   inserted_at: string;
