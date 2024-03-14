@@ -96,7 +96,7 @@ export class JetTower {
     const url = await this.userInfoUrl();
 
     const response = await fetch(url, {
-      method: "POST",
+      method: "GET",
       headers: {
         "Accept": "application/json",
         "Authorization": `Bearer ${accessToken}`,

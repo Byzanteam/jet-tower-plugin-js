@@ -14,6 +14,8 @@ interface UserInfo {
   [index: string]: UserInfoValue;
   name: string;
   phone: string;
+  inserted_at: string;
+  updated_at: string;
 }
 
 export type { JetTowerOAuthClient, JetTowerOptions, UserInfo, UserInfoValue };
