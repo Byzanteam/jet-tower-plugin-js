@@ -7,6 +7,7 @@ import { oauthApiEndpointQuery, oauthClientQuery } from "./api.ts";
 import type {
   OAuthAPIEndpointQueryResponse,
   OAuthClientQueryResponse,
+  UserInfoResponse,
 } from "./api.ts";
 import { url as urlUtils } from "../deps.ts";
 
@@ -105,7 +106,18 @@ export class JetTower {
     });
 
     if (response.ok) {
-      return response.json();
+      const resp: UserInfoResponse = await response.json();
+      const { id, name, phone, updated_at, ...extraInfo } = resp;
+
+      const updatedAt = new Date(updated_at);
+
+      return {
+        sub: id,
+        name,
+        phoneNumber: phone,
+        updatedAt: Math.floor(updatedAt.getTime() / 1000),
+        data: extraInfo,
+      };
     } else {
       const errorBody = await response.json();
       throw new Error("Failed to get user info", { cause: errorBody });

@@ -11,12 +11,11 @@ type UserInfoScalarValue = boolean | number | string;
 type UserInfoValue = UserInfoScalarValue | UserInfoScalarValue[];
 
 interface UserInfo {
-  [index: string]: UserInfoValue;
-  id: string;
+  sub: string;
   name: string;
-  phone: string;
-  inserted_at: string;
-  updated_at: string;
+  phoneNumber: string;
+  updatedAt: number;
+  data: Record<string, UserInfoValue>;
 }
 
 export type { JetTowerOAuthClient, JetTowerOptions, UserInfo, UserInfoValue };
