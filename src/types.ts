@@ -7,15 +7,13 @@ interface JetTowerOAuthClient {
   clientSecret: string;
 }
 
-type UserInfoScalarValue = boolean | number | string;
-type UserInfoValue = UserInfoScalarValue | UserInfoScalarValue[];
-
 interface UserInfo {
   sub: string;
   name: string;
   phoneNumber: string;
+  // The updatedAt is a number representing the number of seconds from 1970-01-01T00:00:00Z as measured in UTC until the date/time.
   updatedAt: number;
-  data: Record<string, UserInfoValue>;
+  data: Record<string, unknown>;
 }
 
-export type { JetTowerOAuthClient, JetTowerOptions, UserInfo, UserInfoValue };
+export type { JetTowerOAuthClient, JetTowerOptions, UserInfo };

@@ -1,4 +1,4 @@
-import { JetTowerOAuthClient, UserInfoValue } from "./types.ts";
+import { JetTowerOAuthClient } from "./types.ts";
 
 const oauthApiEndpointQuery = `
 query OAuthAPIEndpointQuery {
@@ -22,6 +22,9 @@ query {
 interface OAuthClientQueryResponse {
   oauthClient: JetTowerOAuthClient;
 }
+
+type UserInfoScalarValue = boolean | number | string;
+type UserInfoValue = UserInfoScalarValue | UserInfoScalarValue[];
 
 interface UserInfoResponse {
   [index: string]: UserInfoValue;
