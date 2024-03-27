@@ -16,4 +16,17 @@ interface UserInfo {
   data: Record<string, unknown>;
 }
 
-export type { JetTowerOAuthClient, JetTowerOptions, UserInfo };
+interface TokenIntrospection {
+  active: boolean;
+  scope: string;
+  sub: string;
+  exp: number;
+  iat: number;
+}
+
+export type {
+  JetTowerOAuthClient,
+  JetTowerOptions,
+  TokenIntrospection,
+  UserInfo,
+};
