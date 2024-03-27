@@ -35,8 +35,20 @@ interface UserInfoResponse {
   updated_at: string;
 }
 
+interface IntrospectTokenResponse {
+  active: boolean;
+  scope: string;
+  exp: number;
+  sub: string;
+  username?: string;
+  iss: string;
+  iat: number;
+  client_id: string;
+}
+
 export { oauthApiEndpointQuery, oauthClientQuery };
 export type {
+  IntrospectTokenResponse,
   OAuthAPIEndpointQueryResponse,
   OAuthClientQueryResponse,
   UserInfoResponse,

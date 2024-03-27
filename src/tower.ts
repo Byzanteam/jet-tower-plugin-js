@@ -1,10 +1,12 @@
 import type {
   JetTowerOAuthClient,
   JetTowerOptions,
+  TokenIntrospection,
   UserInfo,
 } from "./types.ts";
 import { oauthApiEndpointQuery, oauthClientQuery } from "./api.ts";
 import type {
+  IntrospectTokenResponse,
   OAuthAPIEndpointQueryResponse,
   OAuthClientQueryResponse,
   UserInfoResponse,
@@ -13,6 +15,9 @@ import { url as urlUtils } from "../deps.ts";
 
 export class JetTower {
   private pluginInstance: BreezeRuntime.Plugin;
+
+  private oauthClient?: JetTowerOAuthClient;
+  private oauthApiEndpoint?: URL;
 
   constructor(options: JetTowerOptions) {
     const pluginInstance = BreezeRuntime.plugins[options.instanceName];
@@ -33,15 +38,21 @@ export class JetTower {
    *
    * ```ts
    * const tower = new JetTower({ instanceName: "towerInstance" });
-   * const { clientId, clientSecret } = await tower.oauthClient();
+   * const { clientId, clientSecret } = await tower.getOauthClient();
    * ```
    */
-  async oauthClient(): Promise<JetTowerOAuthClient> {
-    const { oauthClient } = await this.query<OAuthClientQueryResponse>(
-      oauthClientQuery,
-    );
+  async getOauthClient(): Promise<Readonly<JetTowerOAuthClient>> {
+    if (this.oauthClient) {
+      return this.oauthClient;
+    } else {
+      const { oauthClient } = await this.query<OAuthClientQueryResponse>(
+        oauthClientQuery,
+      );
 
-    return oauthClient;
+      this.oauthClient = oauthClient;
+
+      return this.oauthClient;
+    }
   }
 
   /**
@@ -56,10 +67,8 @@ export class JetTower {
    * const url = await tower.authorizeUrl();
    * ```
    */
-  async authorizeUrl(): Promise<URL> {
-    const url = await this.oauthApiEndpoint();
-    url.pathname = urlUtils.joinPath(url.pathname, "/authorize");
-    return url;
+  authorizeUrl(): Promise<URL> {
+    return this.getOAuthApiEndpoint("/authorize");
   }
 
   /**
@@ -74,10 +83,8 @@ export class JetTower {
    * const url = await tower.tokenUrl();
    * ```
    */
-  async tokenUrl(): Promise<URL> {
-    const url = await this.oauthApiEndpoint();
-    url.pathname = urlUtils.joinPath(url.pathname, "/token");
-    return url;
+  tokenUrl(): Promise<URL> {
+    return this.getOAuthApiEndpoint("/token");
   }
 
   /**
@@ -94,7 +101,7 @@ export class JetTower {
    * ```
    */
   async getUserInfo(accessToken: string): Promise<UserInfo> {
-    const url = await this.userInfoUrl();
+    const url = await this.getOAuthApiEndpoint("/user");
 
     const response = await fetch(url, {
       method: "GET",
@@ -119,23 +126,84 @@ export class JetTower {
         data: extraInfo,
       };
     } else {
-      const errorBody = await response.json();
+      const errorBody = await response.text();
       throw new Error("Failed to get user info", { cause: errorBody });
     }
   }
 
-  private async userInfoUrl(): Promise<URL> {
-    const url = await this.oauthApiEndpoint();
-    url.pathname = urlUtils.joinPath(url.pathname, "/user");
-    return url;
+  /**
+   * Introspect an access token
+   *
+   * @param accessToken - OAuth 2 access token
+   * @returns token introspection
+   *
+   * @example
+   *
+   * ```ts
+   * const tower = new JetTower({ instanceName: "towerInstance" });
+   * const { active, scope, exp } = await tower.introspectToken(accessToken);
+   * ```
+   */
+  async introspectToken(
+    accessToken: string,
+  ): Promise<TokenIntrospection> {
+    if (!this.oauthClient) {
+      throw new Error("No OAuth client found");
+    }
+
+    const { clientId, clientSecret } = this.oauthClient;
+
+    const url = await this.getOAuthApiEndpoint("/introspect");
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        client_id: clientId,
+        client_secret: clientSecret,
+        token: accessToken,
+      }),
+    });
+
+    if (response.ok) {
+      const resp: IntrospectTokenResponse = await response.json();
+      const { active, sub, scope, exp, iat } = resp;
+      return { active, sub, scope, exp, iat };
+    } else {
+      const errorBody = await response.text();
+      throw new Error("Failed to introspect token", { cause: errorBody });
+    }
   }
 
-  private async oauthApiEndpoint(): Promise<URL> {
-    const { oauthApiEndpoint } = await this.query<
-      OAuthAPIEndpointQueryResponse
-    >(oauthApiEndpointQuery);
+  private async getOAuthApiEndpoint(path?: string): Promise<URL> {
+    if (this.oauthApiEndpoint) {
+      return this.oauthApiUrl(path);
+    } else {
+      const { oauthApiEndpoint } = await this.query<
+        OAuthAPIEndpointQueryResponse
+      >(oauthApiEndpointQuery);
 
-    return new URL(oauthApiEndpoint);
+      this.oauthApiEndpoint = new URL(oauthApiEndpoint);
+
+      return this.oauthApiUrl(path);
+    }
+  }
+
+  private oauthApiUrl(path?: string): URL {
+    if (!this.oauthApiEndpoint) {
+      throw new Error("OAuth API endpoint is absent");
+    }
+
+    if (path) {
+      const url = new URL(this.oauthApiEndpoint);
+      url.pathname = urlUtils.joinPath(url.pathname, path);
+      return url;
+    } else {
+      return this.oauthApiEndpoint;
+    }
   }
 
   private async query<T>(query: string, variables?: object): Promise<T> {
@@ -153,7 +221,7 @@ export class JetTower {
     if (response.ok) {
       return this.resolveResponse<T>(await response.json());
     } else {
-      const errorBody = await response.json();
+      const errorBody = await response.text();
       throw new Error("Request failed", { cause: errorBody });
     }
   }
