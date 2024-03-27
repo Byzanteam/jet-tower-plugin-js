@@ -147,11 +147,7 @@ export class JetTower {
   async introspectToken(
     accessToken: string,
   ): Promise<TokenIntrospection> {
-    if (!this.oauthClient) {
-      throw new Error("No OAuth client found");
-    }
-
-    const { clientId, clientSecret } = this.oauthClient;
+    const { clientId, clientSecret } = await this.getOauthClient();
 
     const url = await this.getOAuthApiEndpoint("/introspect");
 
