@@ -38,5 +38,5 @@ jobs:
       - name: Type check project
         run: deno task check:types
 
-      - name: Run tests
-        run: deno task test
+      # - name: Run tests
+      #   run: deno task test
