@@ -14,19 +14,18 @@ import type {
 import { url as urlUtils } from "../deps.ts";
 
 export class JetTower {
-  private pluginInstance: BreezeRuntime.Plugin;
-
-  private oauthClient?: JetTowerOAuthClient;
+  private instanceName: string;
   private oauthApiEndpoint?: URL;
+  private oauthClient?: JetTowerOAuthClient;
 
   constructor(options: JetTowerOptions) {
-    const pluginInstance = BreezeRuntime.plugins[options.instanceName];
+    const pluginInstance = BreezeRuntime.getPlugin(options.instanceName);
 
     if (!pluginInstance) {
       throw new Error(`Plugin ${options.instanceName} not found`);
     }
 
-    this.pluginInstance = pluginInstance;
+    this.instanceName = options.instanceName;
   }
 
   /**
@@ -49,9 +48,7 @@ export class JetTower {
         oauthClientQuery,
       );
 
-      this.oauthClient = oauthClient;
-
-      return this.oauthClient;
+      return this.oauthClient = oauthClient;
     }
   }
 
@@ -203,9 +200,7 @@ export class JetTower {
   }
 
   private async query<T>(query: string, variables?: object): Promise<T> {
-    const endpoint = await this.pluginInstance.getEndpoint();
-
-    const response = await fetch(endpoint, {
+    const response = await BreezeRuntime.pluginFetch(this.instanceName, {
       method: "POST",
       headers: {
         "Accept": "application/json",

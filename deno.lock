@@ -1,7 +1,7 @@
 {
-  "version": "3",
+  "version": "4",
   "remote": {
-    "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-js@latest/lib/runtime.ts": "ff2f817652120a33b5d8971ce21928ddeec16139bba7cfd2dd20600055d01485",
+    "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-js@latest/lib/runtime.ts": "416dc4079739918a65d30bb1fed01e8bfdad6ef01f0ee7ed83943cbfe1635a33",
     "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-js@latest/lib/url.ts": "82ce34a50847547eb70391e543dbe29423281fc77822621127a5f609ba8de415"
   }
 }
